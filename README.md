@@ -23,3 +23,7 @@ func main() {
 	fmt.Println(trie.ExactMatchSearch("banana")) // `false`
 }
 ```
+
+## License
+
+MIT
