@@ -31,23 +31,19 @@ func (d *DoubleArray) ExactMatchSearch(s string) bool {
 		return false
 	}
 
-	idx := 0
-	for _, key := range s {
-		nx := d.Nodes[idx].Base + int(key) - 1
+	keys := []rune(s)
+	keys = append(keys, endKey)
 
-		if len(d.Nodes) < nx+1 {
-			return false
-		}
-
-		if d.Nodes[nx].Check == idx+1 {
-			idx = nx
+	i := d.Iterator()
+	for _, key := range keys {
+		if i.HasNext(key) {
+			i.Next(key)
 		} else {
 			return false
 		}
 	}
 
-	node := d.Nodes[d.Nodes[idx].Base+int(endKey)-1]
-	return node.Check == idx+1 && node.Base == 0
+	return i.Node().Base == 0
 }
 
 // ContainsMatch returns that whether the string
