@@ -1,6 +1,8 @@
 // Package doublearray implementation of trie tree
 package doublearray
 
+import "sort"
+
 const endKey rune = 0
 
 // Node is a node of tree
@@ -78,4 +80,108 @@ func (d *DoubleArray) ContainsMatch(s string) bool {
 	}
 
 	return false
+}
+
+func (d *DoubleArray) build(keywords []string) {
+	sort.Strings(keywords)
+
+	for _, keyword := range keywords {
+		if len(keyword) > 0 {
+			d.insert(keyword)
+		}
+	}
+}
+
+func (d *DoubleArray) insert(keyword string) {
+	keys := []rune(keyword)
+	keys = append(keys, endKey)
+
+	i := 0
+	for _, key := range keys {
+		nx := d.setBase(i, key)
+		d.Nodes[nx].Check = i + 1
+		i = nx
+	}
+}
+
+func (d *DoubleArray) setBase(idx int, key rune) int {
+	base := 1
+	if d.Nodes[idx].Base != 0 {
+		base = d.Nodes[idx].Base
+	}
+
+	nx := base + int(key) - 1
+
+	if len(d.Nodes) < nx+1 {
+		nodes := make([]Node, nx+1)
+		copy(nodes, d.Nodes)
+		d.Nodes = nodes
+	}
+
+	n := d.Nodes[nx]
+	if n.Check == 0 && n.Base == 0 {
+		d.Nodes[idx].Base = base
+	} else if n.Check != idx+1 {
+		nx = d.resetBase(idx, key)
+	}
+
+	return nx
+}
+
+func (d *DoubleArray) resetBase(idx int, key rune) int {
+	b := d.Nodes[idx].Base
+
+	nodes := make(map[int]Node)
+	for i, n := range d.Nodes {
+		if n.Check == idx+1 {
+			nodes[i] = n
+		}
+	}
+
+	keys := []rune{key}
+	for i := range nodes {
+		keys = append(keys, rune(i+1-b))
+	}
+
+	base := b
+	for {
+		base++
+		ok := true
+
+		for _, k := range keys {
+			nx := base + int(k) - 1
+			if len(d.Nodes) < nx+1 {
+				n := make([]Node, nx+1)
+				copy(n, d.Nodes)
+				d.Nodes = n
+			}
+
+			ok = ok && d.Nodes[nx].Check == 0 && d.Nodes[nx].Base == 0
+		}
+
+		if ok {
+			break
+		}
+	}
+
+	d.Nodes[idx].Base = base
+
+	for ni, n := range nodes {
+		nx := base + ni - b
+
+		d.Nodes[nx].Base = n.Base
+		d.Nodes[nx].Check = idx + 1
+
+		for i, nd := range d.Nodes {
+			if nd.Check == ni+1 {
+				d.Nodes[i].Check = nx + 1
+
+				d.Nodes[ni].Base = 0
+				d.Nodes[ni].Check = 0
+			}
+		}
+
+	}
+
+	return base + int(key) - 1
 }
