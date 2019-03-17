@@ -24,58 +24,64 @@ func New(keywords []string) *DoubleArray {
 	return &d
 }
 
-// ExactMatchSearch returns that whether the string
-// is contained in trie tree.
-func (d *DoubleArray) ExactMatchSearch(s string) bool {
-	if len(s) == 0 {
-		return false
-	}
+// BreadthFirstSearchFn is used when breadth-first-search for trie tree.
+// Takes matched keyword starts index and length, returning if iteration should be continued.
+type BreadthFirstSearchFn func(index int, length int) bool
 
-	keys := []rune(s)
-	keys = append(keys, endKey)
+// BreadthFirstSearch is used to breadth-first-search for trie tree from string.
+func (d *DoubleArray) BreadthFirstSearch(s string, fn BreadthFirstSearchFn) {
+	for i := 0; i < len(s); i++ {
+		iterator := d.iterator()
+		for j, key := range s[i:] {
+			if iterator.hasNext(key) {
+				iterator.next(key)
 
-	i := d.Iterator()
-	for _, key := range keys {
-		if i.HasNext(key) {
-			i.Next(key)
-		} else {
-			return false
-		}
-	}
-
-	return i.Node().Base == 0
-}
-
-// ContainsMatch returns that whether the string
-// has any match part with trie tree.
-func (d *DoubleArray) ContainsMatch(s string) bool {
-	keys := []rune(s)
-
-	for i := 0; i < len(keys); i++ {
-		idx := 0
-
-		for j := i; j < len(keys); j++ {
-			k := keys[j]
-
-			nx := d.Nodes[idx].Base + int(k) - 1
-			if len(d.Nodes) < nx+1 {
-				break
-			}
-
-			if d.Nodes[nx].Check == idx+1 {
-				idx = nx
-
-				node := d.Nodes[d.Nodes[idx].Base+int(endKey)-1]
-				if node.Check == idx+1 && node.Base == 0 {
-					return true
+				if iterator.isLeaf() && !fn(i, j+1) {
+					break
 				}
 			} else {
 				break
 			}
 		}
 	}
+}
 
-	return false
+// ExactMatchSearch returns that whether the string
+// is contained in trie tree.
+func (d *DoubleArray) ExactMatchSearch(s string) bool {
+	var ok bool
+	if len(s) == 0 {
+		return ok
+	}
+
+	d.BreadthFirstSearch(s, func(index int, length int) bool {
+		if index == 0 && length == len(s) {
+			ok = true
+		}
+
+		return !ok
+	})
+
+	return ok
+}
+
+// CommonPrefixSearchResult is returned from CommonPrefixSearch function
+type CommonPrefixSearchResult []struct {
+	Index int
+	Len   int
+}
+
+// CommonPrefixSearch searches all matched keywords from trie tree
+func (d *DoubleArray) CommonPrefixSearch(s string) CommonPrefixSearchResult {
+	var results CommonPrefixSearchResult
+
+	d.BreadthFirstSearch(s, func(index int, length int) bool {
+		results = append(results, struct{ Index, Len int }{index, length})
+
+		return true
+	})
+
+	return results
 }
 
 func (d *DoubleArray) build(keywords []string) {
