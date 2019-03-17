@@ -13,55 +13,54 @@ func (d *DoubleArray) build(keywords []string) {
 }
 
 func (d *DoubleArray) insert(keyword string) {
-	cursor := 1
-
+	index := 0
 	for _, key := range keyword {
-		d.commit(&cursor, key)
+		d.commit(&index, key)
 	}
 
-	d.commit(&cursor, endKey)
+	d.commit(&index, endKey)
 }
 
-func (d *DoubleArray) commit(c *int, key rune) {
+func (d *DoubleArray) commit(idx *int, key rune) {
 	s := 1
-	if d.Nodes.At(*c).Base != 0 {
-		s = d.Nodes.At(*c).Base
+	if d.Nodes[*idx].Base != 0 {
+		s = d.Nodes[*idx].Base
 	}
 
-	next := s + int(key)
+	nx := s + int(key) - 1
 
-	if len(d.Nodes) < next {
-		nodes := make([]Node, next)
+	if len(d.Nodes) < nx+1 {
+		nodes := make([]Node, nx+1)
 		copy(nodes, d.Nodes)
 		d.Nodes = nodes
 	}
 
-	n := d.Nodes.At(next)
+	n := d.Nodes[nx]
 
-	if n.Check == *c {
-		*c = next
+	if n.Check == *idx+1 {
+		*idx = nx
 	} else if n.Check == 0 && n.Base == 0 {
-		d.Nodes.At(*c).Base = s
-		d.Nodes.At(next).Check = *c
-		*c = next
+		d.Nodes[*idx].Base = s
+		d.Nodes[nx].Check = *idx + 1
+		*idx = nx
 	} else {
-		d.rebase(c, key)
+		d.rebase(idx, key)
 	}
 }
 
-func (d *DoubleArray) rebase(c *int, key rune) {
-	b := d.Nodes.At(*c).Base
+func (d *DoubleArray) rebase(idx *int, key rune) {
+	b := d.Nodes[*idx].Base
 
 	nodes := make(map[int]Node)
 	for i, n := range d.Nodes {
-		if n.Check == *c {
-			nodes[i+1] = n
+		if n.Check == *idx+1 {
+			nodes[i] = n
 		}
 	}
 
 	keys := []rune{key}
-	for c := range nodes {
-		keys = append(keys, rune(c-b))
+	for i := range nodes {
+		keys = append(keys, rune(i+1-b))
 	}
 
 	base := b
@@ -70,14 +69,14 @@ func (d *DoubleArray) rebase(c *int, key rune) {
 		ok := true
 
 		for _, k := range keys {
-			nx := base + int(k)
-			if len(d.Nodes) < nx {
-				n := make([]Node, nx)
+			nx := base + int(k) - 1
+			if len(d.Nodes) < nx+1 {
+				n := make([]Node, nx+1)
 				copy(n, d.Nodes)
 				d.Nodes = n
 			}
 
-			ok = ok && d.Nodes.At(nx).Check == 0 && d.Nodes.At(nx).Base == 0
+			ok = ok && d.Nodes[nx].Check == 0 && d.Nodes[nx].Base == 0
 		}
 
 		if ok {
@@ -85,27 +84,27 @@ func (d *DoubleArray) rebase(c *int, key rune) {
 		}
 	}
 
-	d.Nodes.At(*c).Base = base
+	d.Nodes[*idx].Base = base
 	for _, k := range keys {
-		d.Nodes.At(int(k) + base).Check = *c
+		d.Nodes[int(k)+base-1].Check = *idx + 1
 	}
 
-	for cu, n := range nodes {
-		k := cu - b
-		nx := base + k
+	for ni, n := range nodes {
+		k := ni + 1 - b
+		nx := base + k - 1
 
-		d.Nodes.At(nx).Base = n.Base
+		d.Nodes[nx].Base = n.Base
 
 		for i, nd := range d.Nodes {
-			if nd.Check == cu {
-				d.Nodes[i].Check = nx
+			if nd.Check == ni+1 {
+				d.Nodes[i].Check = nx + 1
 
-				d.Nodes.At(cu).Base = 0
-				d.Nodes.At(cu).Check = 0
+				d.Nodes[ni].Base = 0
+				d.Nodes[ni].Check = 0
 			}
 		}
 
 	}
 
-	*c = base + int(key)
+	*idx = base + int(key) - 1
 }

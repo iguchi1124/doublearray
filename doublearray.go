@@ -3,9 +3,15 @@ package doublearray
 
 const endKey rune = 0
 
+// Node is a node of tree
+type Node struct {
+	Base  int
+	Check int
+}
+
 // DoubleArray is a trie tree entity
 type DoubleArray struct {
-	Nodes
+	Nodes []Node
 }
 
 // New builds trie tree
@@ -23,23 +29,23 @@ func (d *DoubleArray) ExactMatchSearch(s string) bool {
 		return false
 	}
 
-	cursor := 1
+	idx := 0
 	for _, key := range s {
-		next := d.Nodes.At(cursor).Base + int(key)
+		nx := d.Nodes[idx].Base + int(key) - 1
 
-		if len(d.Nodes) < next {
+		if len(d.Nodes) < nx+1 {
 			return false
 		}
 
-		if d.Nodes.At(next).Check == cursor {
-			cursor = next
+		if d.Nodes[nx].Check == idx+1 {
+			idx = nx
 		} else {
 			return false
 		}
 	}
 
-	lastNode := d.Nodes.At(d.Nodes.At(cursor).Base + int(endKey))
-	return lastNode.Check == cursor && lastNode.Base == 0
+	node := d.Nodes[d.Nodes[idx].Base+int(endKey)-1]
+	return node.Check == idx+1 && node.Base == 0
 }
 
 // ContainsMatch returns that whether the string
@@ -48,21 +54,21 @@ func (d *DoubleArray) ContainsMatch(s string) bool {
 	keys := []rune(s)
 
 	for i := 0; i < len(keys); i++ {
-		cursor := 1
+		idx := 0
 
 		for j := i; j < len(keys); j++ {
 			k := keys[j]
 
-			next := d.Nodes.At(cursor).Base + int(k)
-			if len(d.Nodes) < next {
+			nx := d.Nodes[idx].Base + int(k) - 1
+			if len(d.Nodes) < nx+1 {
 				break
 			}
 
-			if d.Nodes.At(next).Check == cursor {
-				cursor = next
+			if d.Nodes[nx].Check == idx+1 {
+				idx = nx
 
-				node := d.Nodes.At(d.Nodes.At(cursor).Base + int(endKey))
-				if node.Check == cursor && node.Base == 0 {
+				node := d.Nodes[d.Nodes[idx].Base+int(endKey)-1]
+				if node.Check == idx+1 && node.Base == 0 {
 					return true
 				}
 			} else {
