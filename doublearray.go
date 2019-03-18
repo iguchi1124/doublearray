@@ -34,7 +34,7 @@ func (d *DoubleArray) BreadthFirstSearch(s string, fn BreadthFirstSearchFn) {
 		iterator := d.iterator()
 		for j, key := range s[i:] {
 			if iterator.hasNext(key) {
-				iterator.next(key)
+				iterator = iterator.next(key)
 
 				if iterator.isLeaf() && !fn(i, j+1) {
 					break
@@ -56,7 +56,7 @@ func (d *DoubleArray) ExactMatchSearch(s string) bool {
 	i := d.iterator()
 	for _, key := range s {
 		if i.hasNext(key) {
-			i.next(key)
+			i = i.next(key)
 		} else {
 			return false
 		}
