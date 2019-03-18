@@ -49,20 +49,20 @@ func (d *DoubleArray) BreadthFirstSearch(s string, fn BreadthFirstSearchFn) {
 // ExactMatchSearch returns that whether the string
 // is contained in trie tree.
 func (d *DoubleArray) ExactMatchSearch(s string) bool {
-	var ok bool
 	if len(s) == 0 {
-		return ok
+		return false
 	}
 
-	d.BreadthFirstSearch(s, func(index int, length int) bool {
-		if index == 0 && length == len(s) {
-			ok = true
+	i := d.iterator()
+	for _, key := range s {
+		if i.hasNext(key) {
+			i.next(key)
+		} else {
+			return false
 		}
+	}
 
-		return !ok
-	})
-
-	return ok
+	return i.isLeaf()
 }
 
 // CommonPrefixSearchResult is returned from CommonPrefixSearch function
