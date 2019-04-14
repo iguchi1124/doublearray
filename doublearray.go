@@ -5,18 +5,18 @@ import "sort"
 
 const endKey rune = 0
 
-// Node is a node of tree
+// Node is a node of dobule-array trie tree.
 type Node struct {
 	Base  int
 	Check int
 }
 
-// DoubleArray is a trie tree entity
+// DoubleArray is a dobule-array trie tree.
 type DoubleArray struct {
 	Nodes []Node
 }
 
-// New builds trie tree
+// New builds a dobule-array trie tree from keywords.
 func New(keywords []string) *DoubleArray {
 	d := DoubleArray{Nodes: make([]Node, 1)}
 	d.build(keywords)
@@ -24,8 +24,8 @@ func New(keywords []string) *DoubleArray {
 	return &d
 }
 
-// BreadthFirstSearchFn is used when breadth-first-search for trie tree.
-// Takes matched keyword starts index and length, returning if iteration should be continued.
+// BreadthFirstSearchFn is used to BreadthFirstSearch function argument.
+// Takes matched data leading index and its length, returning if iteration should be continue.
 type BreadthFirstSearchFn func(index int, length int) bool
 
 // BreadthFirstSearch is used to breadth-first-search for trie tree from string.
@@ -46,8 +46,7 @@ func (d *DoubleArray) BreadthFirstSearch(s string, fn BreadthFirstSearchFn) {
 	}
 }
 
-// ExactMatchSearch returns that whether the string
-// is contained in trie tree.
+// ExactMatchSearch returning if string contains exactly matched keyword in trie tree.
 func (d *DoubleArray) ExactMatchSearch(s string) bool {
 	if len(s) == 0 {
 		return false
@@ -65,13 +64,13 @@ func (d *DoubleArray) ExactMatchSearch(s string) bool {
 	return i.isLeaf()
 }
 
-// CommonPrefixSearchResult is returned from CommonPrefixSearch function
+// CommonPrefixSearchResult is used to CommonPrefixSearch function return value.
 type CommonPrefixSearchResult []struct {
 	Index int
 	Len   int
 }
 
-// CommonPrefixSearch searches all matched keywords with trie tree.
+// CommonPrefixSearch returning all matched keywords with trie tree.
 func (d *DoubleArray) CommonPrefixSearch(s string) CommonPrefixSearchResult {
 	var results CommonPrefixSearchResult
 
@@ -84,7 +83,7 @@ func (d *DoubleArray) CommonPrefixSearch(s string) CommonPrefixSearchResult {
 	return results
 }
 
-// ContainsMatch returning if argument contains matched keyword with trie tree.
+// ContainsMatch returning if string contains matched keyword with trie tree at least one.
 func (d *DoubleArray) ContainsMatch(s string) (ok bool) {
 	d.BreadthFirstSearch(s, func(index int, length int) bool {
 		ok = true

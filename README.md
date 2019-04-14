@@ -2,26 +2,19 @@
 
 [![Build Status](https://travis-ci.org/iguchi1124/doublearray.svg?branch=master)](https://travis-ci.org/iguchi1124/doublearray)
 
-An implementation of trie tree for golang.
+Provides the `doublearray` package that implements a double-array trie tree.
 
-## Usage
+## Documentation
+
+The full documentation is available on [GoDoc](https://godoc.org/github.com/iguchi1124/doublearray).
+
+## Example
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/iguchi1124/doublearray"
-)
-
-var dict = []string{"apple", "orange", "pineapple"}
-
-func main() {
-	trie := doublearray.New(dict)
-	fmt.Println(trie.ExactMatchSearch("apple")) // `true`
-	fmt.Println(trie.ExactMatchSearch("banana")) // `false`
-}
+dict := []string{"apple", "orange", "pineapple"}
+trie := doublearray.New(dict)
+trie.ExactMatchSearch("apple") // true
+trie.ExactMatchSearch("banana") // false
 ```
 
 ## License
