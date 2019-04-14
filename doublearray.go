@@ -71,7 +71,7 @@ type CommonPrefixSearchResult []struct {
 	Len   int
 }
 
-// CommonPrefixSearch searches all matched keywords from trie tree
+// CommonPrefixSearch searches all matched keywords with trie tree.
 func (d *DoubleArray) CommonPrefixSearch(s string) CommonPrefixSearchResult {
 	var results CommonPrefixSearchResult
 
@@ -82,6 +82,16 @@ func (d *DoubleArray) CommonPrefixSearch(s string) CommonPrefixSearchResult {
 	})
 
 	return results
+}
+
+// ContainsMatch returning if argument contains matched keyword with trie tree.
+func (d *DoubleArray) ContainsMatch(s string) (ok bool) {
+	d.BreadthFirstSearch(s, func(index int, length int) bool {
+		ok = true
+		return false
+	})
+
+	return
 }
 
 func (d *DoubleArray) build(keywords []string) {

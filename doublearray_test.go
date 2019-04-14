@@ -52,25 +52,24 @@ func TestExactMatchSearch(t *testing.T) {
 }
 
 func TestCommonPrefixSearch(t *testing.T) {
+	doubleArray := *New([]string{"apple", "orange", "pineapple"})
+
 	tests := []struct {
 		in  string
 		out CommonPrefixSearchResult
 	}{
 		{
-			"I have an pineapple.",
+			"I have a pineapple.",
 			[]struct {
 				Index, Len int
 			}{
-				{10, 9},
-				{14, 5},
+				{9, 9},
+				{13, 5},
 			},
 		},
 	}
 
-	doubleArray := *New([]string{"apple", "orange", "pineapple"})
-
 	for _, test := range tests {
-
 		t.Run(test.in, func(t *testing.T) {
 			ok := true
 			results := doubleArray.CommonPrefixSearch(test.in)
@@ -83,6 +82,33 @@ func TestCommonPrefixSearch(t *testing.T) {
 
 			if !ok {
 				t.Errorf("got %v, want %v", results, test.out)
+			}
+		})
+	}
+}
+
+func TestContainsMatch(t *testing.T) {
+	doubleArray := *New([]string{"apple", "orange", "banana"})
+	tests := []struct {
+		in  string
+		out bool
+	}{
+		{
+			"I have a pineapple.",
+			true,
+		},
+		{
+			"I have a cherry.",
+			false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.in, func(t *testing.T) {
+			result := doubleArray.ContainsMatch(test.in)
+
+			if test.out != result {
+				t.Errorf("got %v, want %v", result, test.out)
 			}
 		})
 	}
