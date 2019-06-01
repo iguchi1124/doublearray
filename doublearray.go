@@ -186,12 +186,11 @@ func (d *DoubleArray) resetBase(idx int, key rune) int {
 		for i, nd := range d.Nodes {
 			if nd.Check == ni+1 {
 				d.Nodes[i].Check = nx + 1
-
-				d.Nodes[ni].Base = 0
-				d.Nodes[ni].Check = 0
 			}
 		}
 
+		d.Nodes[ni].Base = 0
+		d.Nodes[ni].Check = 0
 	}
 
 	return base + int(key) - 1
